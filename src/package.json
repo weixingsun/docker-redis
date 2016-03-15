@@ -1,0 +1,14 @@
+{
+  "name": "ShareServer",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "./nohup.sh"
+  },
+  "dependencies": {
+    "express": "latest",
+    "body-parser": "latest",
+    "georedis": "latest",
+    "redis": "latest"
+  }
+}
