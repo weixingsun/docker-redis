@@ -1,11 +1,9 @@
 var express = require('express');
 var redis = require('redis');
-var msgClient = redis.createClient();
-var geoClient = redis.createClient();
-geoClient.select(1);
+var client = redis.createClient();
+//geoClient.select(1);
 var RedisAPI = require('./RedisAPI');
-var RedisAPI = new RedisAPI(msgClient,geoClient);
-//var geo = require('georedis').initialize(geoClient);
+var RedisAPI = new RedisAPI(client);
 //redis.createClient({host,port,url,detect_buffers})
 //url=[redis:]//[user][:password@][host][:port][/db-number][?db=db-number[&password=bar[&option=value]]]
 //client.expire('key1', 30);
