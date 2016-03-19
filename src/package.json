@@ -9,6 +9,7 @@
     "express": "latest",
     "body-parser": "latest",
     "georedis": "latest",
+    "sol-redis-pool": "latest",
     "redis": "latest"
   }
 }

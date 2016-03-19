@@ -1,13 +1,10 @@
 var express = require('express');
-var redis = require('redis');
-var client = redis.createClient();
-//geoClient.select(1);
+//var client = redis.createClient();
+var Pool = require('./Pool');
+var pool = new Pool();
 var RedisAPI = require('./RedisAPI');
-var RedisAPI = new RedisAPI(client);
-//redis.createClient({host,port,url,detect_buffers})
-//url=[redis:]//[user][:password@][host][:port][/db-number][?db=db-number[&password=bar[&option=value]]]
+var DBAPI = new RedisAPI(pool);
 //client.expire('key1', 30);
-//////////////////todo: pooling
 var bodyParser = require('body-parser');
 //var multer = require('multer'); // v1.0.5
 //var upload = multer();
@@ -20,16 +17,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // msg = {  lat,lng,create_time,owner,title,content,pics,tags, };
 //app.get(url,parser,function)
 app.get('/api/msgs/:type&:pos&:dist', function (req, res) {
-  RedisAPI.rangeMsgDB(res, req.params.type, req.params.pos, req.params.dist);
+  DBAPI.rangeMsgDB(res, req.params.type, req.params.pos, req.params.dist);
 });
 app.post('/api/msg', function (req, res) {
-  RedisAPI.setMsgDB(res,req.body);
+  DBAPI.setMsgDB(res,req.body);
 });
 app.get('/api/msg/:msg_name', function(req, res){
-  RedisAPI.getMsgDB(res,req.params.msg_name);
+  DBAPI.getMsgDB(res,req.params.msg_name);
 });
 app.delete('/api/msg/:name',function(req, res){
-  RedisAPI.rmMsgDB(res,req.params.name);
+  DBAPI.rmMsgDB(res,req.params.name);
 });
 app.use(function(err, req, res, next) { 
   console.error(err.stack); 
