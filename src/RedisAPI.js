@@ -13,6 +13,9 @@ RedisAPI.prototype.getMsgDB = function(resHttp,name) {
   this.pool.getJson(name,resHttp);
   //this.geo.getGeoDB(name);
 };
+RedisAPI.prototype.getMsgTypesDB = function(resHttp) {
+  this.pool.getTypesJson(resHttp);
+};
 RedisAPI.prototype.getManyMsgDB = function(resHttp,names) {
   var multi = this.client.multi();
   var values = names.map(function(name){
@@ -28,13 +31,13 @@ RedisAPI.prototype.getManyMsgDB = function(resHttp,names) {
 RedisAPI.prototype.setMsgDB = function(resHttp,msg){
   this.pool.setJson(msg,resHttp);
   this.pool.setGeoDB(msg);
-  this.typeIncDB(msg.type);
+  this.typeAddDB(msg.type);
 };
 RedisAPI.prototype.rmMsgDB = function(resHttp,k){
   this.pool.rmMsgDB(k,resHttp);
   this.pool.rmGeoDB(k);
 };
-RedisAPI.prototype.typeIncDB = function(k){
-  this.pool.typeInc(k);
+RedisAPI.prototype.typeAddDB = function(k){
+  this.pool.typeAdd(k);
 };
 module.exports = RedisAPI;

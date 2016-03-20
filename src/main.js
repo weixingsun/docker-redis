@@ -25,6 +25,12 @@ app.post('/api/msg', function (req, res) {
 app.get('/api/msg/:msg_name', function(req, res){
   DBAPI.getMsgDB(res,req.params.msg_name);
 });
+app.get('/api/msg_types', function(req, res){
+  DBAPI.getMsgTypesDB(res);
+});
+app.delete('/api/msg_types', function(req, res){
+  DBAPI.rmMsgDB(res,"types");
+});
 app.delete('/api/msg/:name',function(req, res){
   DBAPI.rmMsgDB(res,req.params.name);
 });

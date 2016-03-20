@@ -33,6 +33,16 @@ PoolObj.prototype.getJson = function(name, resHttp){
         });
     });
 };
+PoolObj.prototype.getTypesJson = function(resHttp){
+    var _pool = this.pool;
+    _pool.acquire(function(err,client){
+        client.smembers("types",function(err,reply){
+            if(err) resHttp.json(err);
+            else    resHttp.json(reply);
+            _pool.release(client);
+        });
+    });
+};
 PoolObj.prototype.getManyJson = function(names, resHttp){
     var _pool = this.pool;
     _pool.acquire(function(err,client){
@@ -71,16 +81,16 @@ PoolObj.prototype.rmMsgDB = function(key, resHttp){
         //geo.rmGeoDB(k)
     });
 };
-PoolObj.prototype.typeInc = function(key){
+PoolObj.prototype.typeAdd = function(key){
     var _pool = this.pool;
     _pool.acquire(function(err,client){
-        client.incr("score:"+key, function(err,score){
-            var args = ['types', score, key];
-            client.zadd(args, function(e,reply) {
+        //client.incr("score:"+key, function(err,score){
+        //var args = ['types', score, key];
+        client.sadd("types", key, function(e,reply) {
                 if(e) console.error(e);
                 else  console.log(reply);
                 _pool.release(client);
-            });
+        //});
         });
     });
 };
