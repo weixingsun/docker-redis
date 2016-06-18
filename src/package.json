@@ -8,8 +8,8 @@
   "dependencies": {
     "express": "latest",
     "body-parser": "latest",
+    "redis": "latest",
     "georedis": "latest",
-    "sol-redis-pool": "latest",
-    "redis": "latest"
+    "sol-redis-pool": "latest"
   }
 }

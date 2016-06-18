@@ -1,10 +1,15 @@
 var express = require('express');
-//var client = redis.createClient();
-var Pool = require('./Pool');
-var pool = new Pool();
+var redis = require('redis');
+var client = redis.createClient();
+//var Pool = require('./ConnPool');
+//var pool = new Pool();
 var RedisAPI = require('./RedisAPI');
-var DBAPI = new RedisAPI(pool);
+//var RedisAPI = new RedisAPI(pool);
+var DBAPI = new RedisAPI(client);
+//redis.createClient({host,port,url,detect_buffers})
+//url=[redis:]//[user][:password@][host][:port][/db-number][?db=db-number[&password=bar[&option=value]]]
 //client.expire('key1', 30);
+//////////////////todo: pooling
 var bodyParser = require('body-parser');
 //var multer = require('multer'); // v1.0.5
 //var upload = multer();
@@ -22,14 +27,14 @@ app.get('/api/msgs/:type&:pos&:dist', function (req, res) {
 app.post('/api/msg', function (req, res) {
   DBAPI.setMsgDB(res,req.body);
 });
+app.put('/api/msg', function (req, res) {
+  DBAPI.putMsgDB(res,req.body); 
+});
 app.get('/api/msg/:msg_name', function(req, res){
   DBAPI.getMsgDB(res,req.params.msg_name);
 });
 app.get('/api/msg_types', function(req, res){
   DBAPI.getMsgTypesDB(res);
-});
-app.delete('/api/msg_types', function(req, res){
-  DBAPI.rmMsgDB(res,"types");
 });
 app.delete('/api/msg/:name',function(req, res){
   DBAPI.rmMsgDB(res,req.params.name);

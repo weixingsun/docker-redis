@@ -2,10 +2,12 @@
 #FROM debian:latest
 FROM nginx:latest
 #MAINTAINER Weixing Sun <weixing.sun@gmail.com>
-ENV REDIS_VER=redis-3.2.0-rc3
+ENV REDIS_VER=redis-3.2.1
+#cd redis; make; 
+#redis-3.2.1/redis.conf #bind 127.0.0.1, protected-mode no, daemonize yes
 COPY conf.tar.gz $REDIS_VER.tar.gz src.tar.gz node.tar.gz /
 RUN tar zxf node.tar.gz && tar zxf src.tar.gz && tar zxf conf.tar.gz && tar zxf $REDIS_VER.tar.gz && \
-    mv /conf/sysctl.conf /etc/ && mv /conf/limit.conf /etc/security/limits.d/ && \
+    #mv /conf/sysctl.conf /etc/ && mv /conf/limit.conf /etc/security/limits.d/ && \
     mv /conf/nginx.conf /etc/nginx/ && mv /conf/sites.default /etc/nginx/ && \
     mkdir /www && echo "" > /www/index.html
 ENTRYPOINT ["/src/run.sh"]
