@@ -39,6 +39,9 @@ app.get('/api/msg_types', function(req, res){
 app.delete('/api/msg/:name',function(req, res){
   DBAPI.rmMsgDB(res,req.params.name);
 });
+app.get('/api/notify/:user', function(req, res){
+  DBAPI.getMsgDB(res,'#'+req.params.user);
+});
 app.use(function(err, req, res, next) { 
   console.error(err.stack); 
   console.error(req.body); 
