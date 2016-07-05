@@ -31,7 +31,7 @@ RedisAPI.prototype.getManyMsgDB = function(resHttp,names) {
 };
 //pos={latitude: 43.6667, longitude: -79.4167}
 RedisAPI.prototype.setMsgDB = function(resHttp,msg){
-  var k = msg.type+':'+msg.lat+','+msg.lng;
+  var k = msg.type+':'+msg.lat+','+msg.lng+':'+msg.ctime;
   var pos = {latitude: msg.lat, longitude:msg.lng};
   this.client.hmset(k, msg, function(err, result) {
     if(err) resHttp.json(err);

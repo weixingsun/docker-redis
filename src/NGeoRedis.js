@@ -7,17 +7,17 @@ function NGeoRedisAPI(client) {
 NGeoRedisAPI.prototype.opsFullname = function(fullname){
   var values = fullname.split(':');
   var type = values[0];
-  var name = values[1];
+  var name = values[1]+':'+values[2];
   //console.log('type='+type+',name='+name)
   var geo = require('georedis').initialize(this.client, {
-    zset: type,
+    zset: 'geo:'+type,
   })
   return [geo,name];
 };
 //pos={latitude: 43.6667, longitude: -79.4167}
 NGeoRedisAPI.prototype.setGeoDB = function(fullname,pos){
   var values = this.opsFullname(fullname);
-  values[0].addLocation(values[1], pos, function(err, reply){
+  values[0].addLocation(values[1], pos, function(err, reply){  //key:lat:lng:ctime
     if(err) console.error(err)
     //else console.log('added location:', reply)
   });
@@ -48,7 +48,7 @@ NGeoRedisAPI.prototype.range = function(resHttp,type,pos,dist ){
     accurate: true // Useful if in emulated mode and accuracy is important, default false
   };
   var geo = require('georedis').initialize(this.client, {
-    zset: type,
+    zset: 'geo:'+type,
   });
   var values = pos.split(',');
   var posJson = {latitude:values[0],longitude:values[1]};
@@ -59,7 +59,7 @@ NGeoRedisAPI.prototype.range = function(resHttp,type,pos,dist ){
 };
 NGeoRedisAPI.prototype.rangeFull = function(resHttp,type,locations){
   var keys = locations.map(function(item) {
-    return type+':'+item.key;
+    return type+':'+item.key;  //key=type:geokey, geokey=lat,lng:ctime
   });
   //console.log(keys);
   var multi = this.client.multi();
