@@ -85,20 +85,20 @@ RedisAPI.prototype.getHashKeysDB = function(resHttp,key){
 };
 RedisAPI.prototype.renameHashDB = function(resHttp, body){
   var _client = this.client;  //body.key, body.oldfield, body.newfield
-  console.log('key='+body.key +', oldfield='+ body.oldfield+', newfield='+body.newfield)
+  //console.log('key='+body.key +', oldfield='+ body.oldfield+', newfield='+body.newfield)
   this.client.hget(body.key, body.oldfield, function(err,value){
     if(err){
       resHttp.json(err);
-      console.log('hget.err='+ err)
+      //console.log('hget.err='+ err)
     }else{
-      console.log('hget.key='+body.key +', value='+ value)
+      //console.log('hget.key='+body.key +', value='+ value)
       _client.hset(body.key,body.newfield,value, function(err, result) {
         if(err){
-          console.log('hset.err='+ err)
+          //console.log('hset.err='+ err)
           //resHttp.json(err);
         }
         //else    resHttp.json(msg);
-        console.log('hdel key='+body.key +', hset.result='+ result)
+        //console.log('hdel key='+body.key +', hset.result='+ result)
         _client.hdel(body.key, body.oldfield)
       });
     }
