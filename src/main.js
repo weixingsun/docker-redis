@@ -42,6 +42,13 @@ app.delete('/api/msg/:name',function(req, res){
 app.get('/api/notify/:user', function(req, res){
   DBAPI.getMsgDB(res,'#'+req.params.user);
 });
+app.get('/api/hash/:key', function(req, res){
+  //console.log('/api/hash/'+req.params.key)  // express cannot get with #
+  DBAPI.getHashKeysDB(res, req.params.key)
+});
+app.put('/api/hash/rename', function(req, res){
+  DBAPI.renameHashDB(res, req.body) // key,oldfield,newfield
+});
 app.use(function(err, req, res, next) { 
   console.error(err.stack); 
   console.error(req.body); 

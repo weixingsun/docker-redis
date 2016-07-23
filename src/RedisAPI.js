@@ -47,6 +47,13 @@ RedisAPI.prototype.putMsgDB = function(resHttp,body){
     else    resHttp.json(result);
   });
 };
+RedisAPI.prototype.rmHashDB = function(resHttp,key,field){
+  this.client.send_command('hdel',key,field, function(err, result) {
+    if(err) resHttp.json(err);
+    else    resHttp.json(result);
+  });
+  this.geo.rmGeoDB(k);
+};
 RedisAPI.prototype.rmMsgDB = function(resHttp,k){
   this.client.del(k, function(err, result) {
     if(err) resHttp.json(err);
@@ -67,6 +74,34 @@ RedisAPI.prototype.setTypeDB = function(k){
       if(err) console.log(e);
       //else console.log("type:"+k+' with score:'+score);
     });
+  });
+};
+RedisAPI.prototype.getHashKeysDB = function(resHttp,key){
+  //console.log('RedisAPI.getHashKeysDB()key='+key +', err='+err+', result='+result)
+  this.client.hkeys(key, function(err,result){
+    if(err) resHttp.json(err);
+    else    resHttp.json(result);
+  })
+};
+RedisAPI.prototype.renameHashDB = function(resHttp, body){
+  var _client = this.client;  //body.key, body.oldfield, body.newfield
+  console.log('key='+body.key +', oldfield='+ body.oldfield+', newfield='+body.newfield)
+  this.client.hget(body.key, body.oldfield, function(err,value){
+    if(err){
+      resHttp.json(err);
+      console.log('hget.err='+ err)
+    }else{
+      console.log('hget.key='+body.key +', value='+ value)
+      _client.hset(body.key,body.newfield,value, function(err, result) {
+        if(err){
+          console.log('hset.err='+ err)
+          //resHttp.json(err);
+        }
+        //else    resHttp.json(msg);
+        console.log('hdel key='+body.key +', hset.result='+ result)
+        _client.hdel(body.key, body.oldfield)
+      });
+    }
   });
 };
 module.exports = RedisAPI;
