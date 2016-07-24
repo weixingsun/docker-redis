@@ -40,11 +40,14 @@ app.delete('/api/msg/:name',function(req, res){
   DBAPI.rmMsgDB(res,req.params.name);
 });
 app.get('/api/notify/:user', function(req, res){
-  DBAPI.getMsgDB(res,'#'+req.params.user);
+  DBAPI.getMsgDB(res,req.params.user);
 });
 app.get('/api/hash/:key', function(req, res){
   //console.log('/api/hash/'+req.params.key)  // express cannot get with #
   DBAPI.getHashKeysDB(res, req.params.key)
+});
+app.delete('/api/hashkey', function(req, res){
+  DBAPI.rmHashKeyDB(res, req.body)
 });
 app.put('/api/hash/rename', function(req, res){
   DBAPI.renameHashDB(res, req.body) // key,oldfield,newfield
