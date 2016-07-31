@@ -33,6 +33,9 @@ app.put('/api/msg', function (req, res) {
 app.get('/api/msg/:msg_name', function(req, res){
   DBAPI.getMsgDB(res,req.params.msg_name);
 });
+app.get('/api/mymsg/:user', function(req, res){
+  DBAPI.getMyMsgDB(res,req.params.user);
+});
 app.get('/api/msg_types', function(req, res){
   DBAPI.getMsgTypesDB(res);
 });

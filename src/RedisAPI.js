@@ -29,6 +29,21 @@ RedisAPI.prototype.getManyMsgDB = function(resHttp,names) {
   });
   //this.geo.getGeoDB(name);
 };
+RedisAPI.prototype.getMyMsgDB = function(resHttp,user) {
+  let self = this;
+  this.client.hgetall(user,function(err,result){
+      if(err) resHttp.json(err);
+      else{    //resHttp.json(result);  //{"type:lat,lng:ctime":"owner|open"}
+          var multi = self.client.multi();
+          let keys = Object.keys(result)
+          var values = keys.map(function(key){ multi.hgetall(key)});
+          multi.exec(function(err, values){
+              if(err) resHttp.json(err);
+              else    resHttp.json(values);
+          });
+      }
+  });
+};
 //pos={latitude: 43.6667, longitude: -79.4167}
 RedisAPI.prototype.setMsgDB = function(resHttp,msg){
   var k = msg.type+':'+msg.lat+','+msg.lng+':'+msg.ctime;
