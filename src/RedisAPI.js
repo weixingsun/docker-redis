@@ -34,13 +34,16 @@ RedisAPI.prototype.getMyMsgDB = function(resHttp,user) {
   this.client.hgetall(user,function(err,result){
       if(err) resHttp.json(err);
       else{    //resHttp.json(result);  //{"type:lat,lng:ctime":"owner|open"}
-          var multi = self.client.multi();
-          let keys = Object.keys(result)
-          var values = keys.map(function(key){ multi.hgetall(key)});
-          multi.exec(function(err, values){
-              if(err) resHttp.json(err);
-              else    resHttp.json(values);
-          });
+          if(result==null) resHttp.json([]);
+          else{
+              var multi = self.client.multi();
+              let keys = Object.keys(result)
+              var values = keys.map(function(key){ multi.hgetall(key)});
+              multi.exec(function(err, values){
+                  if(err) resHttp.json(err);
+                  else    resHttp.json(values);
+              });
+          }
       }
   });
 };
