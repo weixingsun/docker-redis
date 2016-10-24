@@ -6,9 +6,9 @@ function RedisAPI(client) {
     this.geo = new NGeoRedisAPI(client);
 }
 
-RedisAPI.prototype.rangeMsgDB = function(resHttp,type,pos,dist) {
+RedisAPI.prototype.rangeMsgDB = function(resHttp,type,cat,pos,dist) {
   //params = {lat1, lat2, dist, owner, content, create_time, title, tags, pics}
-  this.geo.range(resHttp,type,pos,dist);
+  this.geo.range(resHttp,type,cat,pos,dist);
 };
 RedisAPI.prototype.getMsgDB = function(resHttp,name) {
   this.client.hgetall(name,function(err,reply){
@@ -49,7 +49,7 @@ RedisAPI.prototype.getMyMsgDB = function(resHttp,user) {
 };
 //pos={latitude: 43.6667, longitude: -79.4167}
 RedisAPI.prototype.setMsgDB = function(resHttp,msg){
-  var k = msg.type+':'+msg.lat+','+msg.lng+':'+msg.ctime;
+  var k = msg.type+'_'+msg.cat+':'+msg.lat+','+msg.lng+':'+msg.ctime;
   var pos = {latitude: msg.lat, longitude:msg.lng};
   this.client.hmset(k, msg, function(err, result) {
     if(err) resHttp.json(err);

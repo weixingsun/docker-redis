@@ -21,8 +21,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //app.enable('trust proxy');
 // msg = {  lat,lng,create_time,owner,title,content,pics,tags, };
 //app.get(url,parser,function)
-app.get('/api/msgs/:type&:pos&:dist', function (req, res) {
-  DBAPI.rangeMsgDB(res, req.params.type, req.params.pos, req.params.dist);
+app.get('/api/msgs/:type_cat&:pos&:dist', function (req, res) {
+  let arr = req.params.type_cat.split('_')
+  //let type= arr[0]  cat = arr[1]
+  DBAPI.rangeMsgDB(res, arr[0], arr[1], req.params.pos, req.params.dist);
 });
 app.post('/api/msg', function (req, res) {
   DBAPI.setMsgDB(res,req.body);
