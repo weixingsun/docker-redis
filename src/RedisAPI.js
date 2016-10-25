@@ -1,15 +1,45 @@
 //client.expire('key1', 30);
-var NGeoRedisAPI = require('./NGeoRedis');
 
 function RedisAPI(client) {
     this.client = client;
-    this.geo = new NGeoRedisAPI(client);
 }
-
+function getGeoKey(msg) {
+    return msg.lat+','+msg.lng+':'+msg.ctime
+}
+function getGeoSet(msg) {
+    return 'geo:'+msg.type+'_'+msg.cat
+}
+function getKey(msg) {
+    return msg.type+'_'+msg.cat+':'+msg.lat+','+msg.lng+':'+msg.ctime
+}
+///////////////////////////////////////////////////////////////////////////////
 RedisAPI.prototype.rangeMsgDB = function(resHttp,type,cat,pos,dist) {
-  //params = {lat1, lat2, dist, owner, content, create_time, title, tags, pics}
-  this.geo.range(resHttp,type,cat,pos,dist);
+  //car, sell, lat,lng, 
+  var self = this;
+  let geoset = 'geo:'+type+'_'+cat;
+  let values = pos.split(',');
+  let lat = values[0]
+  let lng= values[1]
+  //console.log('range() set:'+geoset+' lat='+lat+' lng='+lng+' dist='+dist)
+  this.client.georadius(geoset, lng,lat, dist, 'm', function(err, locations){ //'m','WITHCOORD','WITHDIST','ASC'
+    if(err) resHttp.json(err);
+    else    self.rangeFull(resHttp,type,cat,locations);
+  });
 };
+RedisAPI.prototype.rangeFull = function(resHttp,type,cat,locations){
+  //console.log(locations)
+  var keys = locations.map(function(item) {
+    return type+'_'+cat+':'+item;  //key=type_cat:geokey, geokey=lat,lng:ctime
+  });
+  var multi = this.client.multi();
+  var values = keys.map(function(key){ multi.hgetall(key)});
+  multi.exec(function(err, values){
+    if(err) resHttp.json(err);
+    //else    resHttp.json({radius:locations, msgs:values});
+    else    resHttp.json(values);
+  });
+};
+///////////////////////////////////////////////////////////////////////////////
 RedisAPI.prototype.getMsgDB = function(resHttp,name) {
   this.client.hgetall(name,function(err,reply){
     //console.log(name+reply)
@@ -49,14 +79,59 @@ RedisAPI.prototype.getMyMsgDB = function(resHttp,user) {
 };
 //pos={latitude: 43.6667, longitude: -79.4167}
 RedisAPI.prototype.setMsgDB = function(resHttp,msg){
-  var k = msg.type+'_'+msg.cat+':'+msg.lat+','+msg.lng+':'+msg.ctime;
-  var pos = {latitude: msg.lat, longitude:msg.lng};
+  var k = getKey(msg)
+  //var pos = {latitude: msg.lat, longitude:msg.lng};
   this.client.hmset(k, msg, function(err, result) {
     if(err) resHttp.json(err);
     else    resHttp.json(msg);
   });
-  this.geo.setGeoDB(k,pos);
   this.setTypeDB(msg.type);
+  this.setGeoDB(msg);
+  this.setGeoTTL(k,msg);
+};
+RedisAPI.prototype.setGeoDB = function(msg){
+/*
+  let arr=key.split(':')
+  let geoset = arr[0]
+  let pos = arr[1].split(',')
+  let lat = pos[0]
+  let lng = pos[1]
+  let ctime=arr[2]
+*/
+  let geoset = getGeoSet(msg)
+  let name = getGeoKey(msg)
+  this.client.geoadd(geoset,msg.lng,msg.lat,name);
+};
+RedisAPI.prototype.setGeoTTL = function(key,msg){
+  let dayInt = (60*60*24)
+  let ttl = msg.ctime+dayInt*30;
+  if(msg.time){  //'2016-11-22 10:30'
+    let rawTime = new Date(msg.time+":00").getTime()+dayInt
+    ttl = Math.round(rawTime/1000)
+  }
+  //console.log('ttl:'+ttl)
+  this.client.expireat(key, ttl);
+  let ttl_set_name = 'ttl.'+getGeoSet(msg)
+  let geokey = getGeoKey(msg)
+  this.client.zadd(ttl_set_name,ttl,geokey);
+};
+RedisAPI.prototype.rmGeoTTL = function(key){
+  let self = this;
+  let arr = key.split(':');  //cat_buy:lat,lng:ctime
+  let geo_set_name = 'geo:'+arr[0]
+  let ttl_set_name = 'ttl.'+geo_set_name
+  let nowInt = Math.round(+new Date()/1000)
+  let key1 = arr[1]+':'+arr[2]
+  //console.log('rm geo/ttl:'+key1)
+  self.client.zrem(ttl_set_name,key1);
+  self.client.zrem(geo_set_name,key1);
+  //rm all expired geo rows
+  this.client.zrangebyscore(ttl_set_name,0,nowInt, function (err, keys) {
+    keys.map((key)=>{
+      self.client.zrem(ttl_set_name,key);
+      self.client.zrem(geo_set_name,key);
+    })
+  });
 };
 RedisAPI.prototype.putMsgDB = function(resHttp,body){
    //body.key,body.field,body.value  //null check
@@ -76,7 +151,7 @@ RedisAPI.prototype.rmMsgDB = function(resHttp,k){
     if(err) resHttp.json(err);
     else    resHttp.json(result);
   });
-  this.geo.rmGeoDB(k);
+  this.rmGeoTTL(k);
 };
 RedisAPI.prototype.delDB = function(k){
   this.client.del(k, function(e) {
