@@ -85,7 +85,7 @@ RedisAPI.prototype.setMsgDB = function(resHttp,msg){
     if(err) resHttp.json(err);
     else    resHttp.json(msg);
   });
-  this.setTypeDB(msg.type);
+  //this.setTypeDB(msg.type);
   this.setGeoDB(msg);
   this.setGeoTTL(k,msg);
 };
@@ -104,12 +104,15 @@ RedisAPI.prototype.setGeoDB = function(msg){
 };
 RedisAPI.prototype.setGeoTTL = function(key,msg){
   let dayInt = (60*60*24)
-  let ttl = msg.ctime+dayInt*30;
+  let timeInt = msg.ctime
+  if(typeof timeInt==='string') timeInt=parseInt(timeInt)
+  let ttl = timeInt+dayInt*30;
   if(msg.time){  //'2016-11-22 10:30'
-    let rawTime = new Date(msg.time+":00").getTime()+dayInt
-    ttl = Math.round(rawTime/1000)
+    let rawTime = new Date(msg.time+":00").getTime()
+    let nextDay = rawTime+dayInt
+    //console.log('msg.time='+msg.time+'  rawTime='+rawTime+'  nextDay='+nextDay)
+    ttl = Math.round(nextDay/1000)
   }
-  //console.log('ttl:'+ttl)
   this.client.expireat(key, ttl);
   let ttl_set_name = 'ttl.'+getGeoSet(msg)
   let geokey = getGeoKey(msg)
