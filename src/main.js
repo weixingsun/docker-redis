@@ -4,8 +4,9 @@ var client = redis.createClient();
 //var Pool = require('./ConnPool');
 //var pool = new Pool();
 var RedisAPI = require('./RedisAPI');
-//var RedisAPI = new RedisAPI(pool);
 var DBAPI = new RedisAPI(client);
+var NetAPI = require('./NetAPI');
+var Net = new NetAPI();
 //redis.createClient({host,port,url,detect_buffers})
 //url=[redis:]//[user][:password@][host][:port][/db-number][?db=db-number[&password=bar[&option=value]]]
 //client.expire('key1', 30);
@@ -28,6 +29,7 @@ app.get('/api/msgs/:type_cat&:pos&:dist', function (req, res) {
 });
 app.post('/api/msg', function (req, res) {
   DBAPI.setMsgDB(res,req.body);
+  Net.push(Net.makepushjson(req.body));
 });
 app.put('/api/msg', function (req, res) {
   DBAPI.putMsgDB(res,req.body); 
