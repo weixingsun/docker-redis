@@ -14,8 +14,9 @@ NetAPI.prototype.makepushjson = function (json) {
   return {
     app_id: "beed51f1-1763-4ab3-bcd2-da4364786ceb",
     contents: {"en": json.title},
+    data: {"tag_notification": json.type+'_'+json.cat+':'+json.lat+','+json.lng+':'+json.ctime},
     filters: [
-      {"field": "tag", "key": json.type+'_'+json.cat, "relation": "=", "value": json.country+'_'+json.city}, 
+      {"field": "tag", "key": json.type+'_'+json.cat, "relation": "=", "value": json.country+' '+json.city}, 
       //{"operator": "OR"}, 
       //{"field": "amount_spent", "relation": ">", "value": "0"}
     ]
