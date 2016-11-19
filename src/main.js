@@ -29,7 +29,6 @@ app.get('/api/msgs/:type_cat&:pos&:dist', function (req, res) {
 });
 app.post('/api/msg', function (req, res) {
   DBAPI.setMsgDB(res,req.body);
-  Net.push(Net.makepushjson(req.body));
 });
 app.put('/api/msg', function (req, res) {
   DBAPI.putMsgDB(res,req.body); 

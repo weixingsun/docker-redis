@@ -81,9 +81,27 @@ RedisAPI.prototype.getMyMsgDB = function(resHttp,user) {
 RedisAPI.prototype.setMsgDB = function(resHttp,msg){
   var k = getKey(msg)
   //var pos = {latitude: msg.lat, longitude:msg.lng};
+  let self=this
   this.client.hmset(k, msg, function(err, result) {
-    if(err) resHttp.json(err);
-    else    resHttp.json(msg);
+    if(err!=null){
+      //console.log('post.bad -> setMsgDB() err='+err+'\nresult='+JSON.stringify(result)+'\nmsg='+JSON.stringify(msg))
+      resHttp.json(err)
+    }else{
+      var small = {}
+      for(var key in msg){
+        if(key.indexOf('#')<0){
+          small[key]=msg[key]
+        }
+      }
+      //{type:msg.type,cat:msg.cat,lat:msg.lat,lng:msg.lng,ctime:msg.ctime,phone:msg.phone}
+      resHttp.json(small)
+      //console.log('post.good -> setMsgDB() err='+err+'\nresult='+JSON.stringify(result)+'\nmsg='+JSON.stringify(small))
+      /*self.client.hgetall(k,function(err,reply){
+        //if(err) resHttp.json(err);
+        console.log('post.good -> setMsgDB() small='+JSON.stringify(small)+'\nmsg='+JSON.stringify(reply))
+        resHttp.json(reply);
+      })*/
+    }
   });
   //this.setTypeDB(msg.type);
   this.setGeoDB(msg);
