@@ -12,6 +12,7 @@ function getGeoSet(msg) {
 function getKey(msg) {
     return msg.type+'_'+msg.cat+':'+msg.lat+','+msg.lng+':'+msg.ctime
 }
+let all_geo_set_name = 'geo_index_all';
 ///////////////////////////////////////////////////////////////////////////////
 RedisAPI.prototype.rangeMsgDB = function(resHttp,type,cat,pos,dist) {
   //car, sell, lat,lng, 
@@ -108,17 +109,9 @@ RedisAPI.prototype.setMsgDB = function(resHttp,msg){
   this.setGeoTTL(k,msg);
 };
 RedisAPI.prototype.setGeoDB = function(msg){
-/*
-  let arr=key.split(':')
-  let geoset = arr[0]
-  let pos = arr[1].split(',')
-  let lat = pos[0]
-  let lng = pos[1]
-  let ctime=arr[2]
-*/
-  let geoset = getGeoSet(msg)
-  let name = getGeoKey(msg)
-  this.client.geoadd(geoset,msg.lng,msg.lat,name);
+  //let arr=key.split(':'), geoset = arr[0], pos = arr[1].split(','), ctime=arr[2]
+  this.client.geoadd(getGeoSet(msg),msg.lng,msg.lat,getGeoKey(msg));
+  this.client.geoadd(all_geo_set_name,msg.lng,msg.lat,getKey(msg));
 };
 RedisAPI.prototype.setGeoTTL = function(key,msg){
   let dayInt = (60*60*24)
@@ -139,18 +132,21 @@ RedisAPI.prototype.setGeoTTL = function(key,msg){
 RedisAPI.prototype.rmGeoTTL = function(key){
   let self = this;
   let arr = key.split(':');  //cat_buy:lat,lng:ctime
-  let geo_set_name = 'geo:'+arr[0]
+  let typecat = arr[0]
+  let geo_set_name = 'geo:'+typecat
   let ttl_set_name = 'ttl.'+geo_set_name
   let nowInt = Math.round(+new Date()/1000)
   let key1 = arr[1]+':'+arr[2]
   //console.log('rm geo/ttl:'+key1)
   self.client.zrem(ttl_set_name,key1);
   self.client.zrem(geo_set_name,key1);
+  self.client.zrem(all_geo_set_name,key);
   //rm all expired geo rows
   this.client.zrangebyscore(ttl_set_name,0,nowInt, function (err, keys) {
     keys.map((key)=>{
       self.client.zrem(ttl_set_name,key);
       self.client.zrem(geo_set_name,key);
+      self.client.zrem(all_geo_set_name,typecat+':'+key);
     })
   });
 };
