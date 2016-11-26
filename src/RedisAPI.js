@@ -14,6 +14,18 @@ function getKey(msg) {
 }
 let all_geo_set_name = 'geo_index_all';
 ///////////////////////////////////////////////////////////////////////////////
+RedisAPI.prototype.rangeAllMsgDB = function(resHttp,type,cat,pos,dist) {
+  //car, sell, lat,lng, 
+  //console.log('rangeAllMsgDB type='+type+' cat='+cat+' pos='+pos+' dist='+dist)
+  var self = this;
+  let values = pos.split(',');
+  let lat = values[0]
+  let lng= values[1]
+  this.client.georadius(all_geo_set_name, lng,lat, dist, 'm', function(err, locations){ //'m','WITHCOORD','WITHDIST','ASC'
+    if(err) resHttp.json(err);
+    else    self.rangeAllFull(resHttp,locations);
+  });
+};
 RedisAPI.prototype.rangeMsgDB = function(resHttp,type,cat,pos,dist) {
   //car, sell, lat,lng, 
   var self = this;
@@ -28,7 +40,6 @@ RedisAPI.prototype.rangeMsgDB = function(resHttp,type,cat,pos,dist) {
   });
 };
 RedisAPI.prototype.rangeFull = function(resHttp,type,cat,locations){
-  //console.log(locations)
   var keys = locations.map(function(item) {
     return type+'_'+cat+':'+item;  //key=type_cat:geokey, geokey=lat,lng:ctime
   });
@@ -36,7 +47,15 @@ RedisAPI.prototype.rangeFull = function(resHttp,type,cat,locations){
   var values = keys.map(function(key){ multi.hgetall(key)});
   multi.exec(function(err, values){
     if(err) resHttp.json(err);
-    //else    resHttp.json({radius:locations, msgs:values});
+    else    resHttp.json(values);
+  });
+};
+RedisAPI.prototype.rangeAllFull = function(resHttp,keys){
+  //console.log('rangeAllFull keys.length='+keys.length);
+  var multi = this.client.multi();
+  var values = keys.map(function(key){ multi.hgetall(key)});
+  multi.exec(function(err, values){
+    if(err) resHttp.json(err);
     else    resHttp.json(values);
   });
 };

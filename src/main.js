@@ -24,8 +24,13 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //app.get(url,parser,function)
 app.get('/api/msgs/:type_cat&:pos&:dist', function (req, res) {
   let arr = req.params.type_cat.split('_')
-  //let type= arr[0]  cat = arr[1]
-  DBAPI.rangeMsgDB(res, arr[0], arr[1], req.params.pos, req.params.dist);
+  let type= arr[0],cat=arr[1]
+  //console.log('main.range - type='+type+' cat='+cat)
+  if(type=='all'){
+    DBAPI.rangeAllMsgDB(res, type, cat, req.params.pos, req.params.dist);
+  }else{
+    DBAPI.rangeMsgDB(res, type, cat, req.params.pos, req.params.dist);
+  }
 });
 app.post('/api/msg', function (req, res) {
   DBAPI.setMsgDB(res,req.body);
